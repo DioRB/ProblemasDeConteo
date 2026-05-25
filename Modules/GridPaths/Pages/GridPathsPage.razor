@@ -1,0 +1,99 @@
+﻿@page "/gridpaths"
+@using System.Numerics
+@using Problemas_de_Conteo.Modules.GridPaths.Services
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@inject GridPathService GridPathService
+@implements IAsyncDisposable
+
+<h1>Caminos en Grillas</h1>
+<p>
+    Conteo de caminos mínimos desde (0,0) hasta (a,b), moviéndose únicamente hacia la derecha o arriba.
+</p>
+<hr />
+<div>
+    <label>Valor de a:</label>
+    <input type="number" @bind="A" />
+</div>
+<br />
+<div>
+    <label>Valor de b:</label>
+    <input type="number" @bind="B" />
+</div>
+<br />
+
+
+<button @onclick="CalculatePaths">Calcular caminos</button>
+<hr />
+
+
+<!-- Muestra los resultados del calculo -->
+
+@if (Result is not null)
+{
+    <h3>Resultado</h3>
+    <p>Número de caminos mínimos:</p>
+    <h2>@Result</h2>
+    <p>Fórmula utilizada:</p>
+    <div id="math-output"></div>
+    <p>Prueba intercambiar los valores de a y b, y observarás como la cantidad de caminos minimos es la misma, es decir, que</p>
+    
+    <div id="verificacion-igualdad"></div>
+}
+
+<!-- Espacio para poner proximamente el mapa (plano cartenciano?) para hacerlo visual -->
+
+
+
+
+
+@code {
+    private int A = 3; // Valores bases o si no funciona de esta manera
+    private int B = 3;
+    private BigInteger? Result;
+    private IJSObjectReference? _module;
+    private bool _shouldRenderMath = false;
+
+    private void CalculatePaths()
+    {
+        Result = GridPathService.CalculateBasicPath(A, B);
+        _shouldRenderMath = true;
+    }
+
+    // Se llama a MathJax
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender || _shouldRenderMath)
+        {
+            _shouldRenderMath = false;
+            await RenderMath();
+        }
+    }
+
+    // Metodo donde se construye la función para que se pueda recargar con cada cálculo
+    private async Task RenderMath()
+    {
+        if (Result is null) return;
+
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./js/mathjax-helper.js");
+
+            //String del cálculo           
+            string latexFormula = $"\\binom{{a + b}}{{a}} = \\binom{{{A + B}}}{{{A}}} = {Result}";
+
+            await _module.InvokeVoidAsync("renderMathJax", latexFormula);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"MathJax error: {ex.Message}");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is not null)
+            await _module.DisposeAsync();
+    }
+}
