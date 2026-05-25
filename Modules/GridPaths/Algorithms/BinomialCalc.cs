@@ -4,7 +4,7 @@ namespace Problemas_de_Conteo.Modules.GridPaths.Algorithms
 {
 	public static class BinomialCalc
 	{
-		// Fucnion del calculo binomial (a+b b)
+		// Función del calculo binomial (a+b b)
 		public static BigInteger CalculateBin(int n, int k)
 		{
 			if (k < 0 || k > n)
