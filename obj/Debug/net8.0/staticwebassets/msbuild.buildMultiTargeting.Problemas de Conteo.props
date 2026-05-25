@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\Problemas de Conteo.props" />
-</Project>
