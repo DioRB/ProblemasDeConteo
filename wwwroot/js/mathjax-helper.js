@@ -1,31 +1,17 @@
-// Recibe todo lo necesario para mostrar las formulas
-export async function renderMathJax(latexFormula) {
-
+// Obtiene los id para hacer el renderizado en latex
+export async function renderMath(elementId, latexContent) {
     if (!window.MathJax) return;
 
     await MathJax.startup.promise;
 
-    const target = document.getElementById('math-output');
-    const targetComp = document.getElementById('verificacion-igualdad');
+    const target = document.getElementById(elementId);
+    if (!target) return;
 
-    // El calculo binomial de a y b
-    if (target) {
+    MathJax.typesetClear([target]);
 
-        MathJax.typesetClear([target]);
+    target.innerHTML = `\\[
+        ${latexContent}
+    \\]`;
 
-        target.innerHTML = `\\[ ${latexFormula} \\]`;
-    }
-
-    // La formula estática donde se verifica la igualdad 
-    if (targetComp) {
-
-        MathJax.typesetClear([targetComp]);
-
-        targetComp.innerHTML =
-            `\\[
-            \\binom{a+b}{a} = \\binom{a+b}{b}
-            \\]`;
-    }
-
-    await MathJax.typesetPromise([target, targetComp]);
+    await MathJax.typesetPromise([target]);
 }
