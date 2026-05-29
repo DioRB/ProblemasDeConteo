@@ -1,0 +1,50 @@
+﻿.grid-svg {
+    border: 2px solid #444;
+    background-color: #fafafa;
+    margin-top: 30px;
+}
+
+.grid-line {
+    stroke: #999;
+    stroke-width: 2;
+}
+
+.grid-node {
+    fill: white;
+    stroke: #333;
+    stroke-width: 2;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+    .grid-node:hover {
+        r: 13;
+    }
+
+.start-node {
+    fill: #4caf50;
+}
+
+.end-node {
+    fill: #f44336;
+}
+
+.blocked-node {
+    fill: #222;
+}
+
+.mandatory-node {
+    fill: #2196f3;
+}
+
+.grid-label {
+    font-size: 12px;
+    text-anchor: middle;
+    fill: #333;
+}
+
+.mode-panel {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
