@@ -9,7 +9,11 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
+//Servicios para la grilla
 builder.Services.AddScoped<GridPathService>();
+builder.Services.AddScoped<GridGeneratorService>();
+builder.Services.AddScoped<GridDynamicService>();
 
 
 
