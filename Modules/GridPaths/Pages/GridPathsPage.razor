@@ -1,9 +1,12 @@
 ﻿@page "/gridpaths"
 @using System.Numerics
 @using Problemas_de_Conteo.Modules.GridPaths.Services
+@using Problemas_de_Conteo.Modules.GridPaths.Models
 @using Microsoft.JSInterop
 @inject IJSRuntime JS
 @inject GridPathService GridPathService
+@inject GridGeneratorService GridGeneratorService
+@inject GridDynamicService GridDynamicService
 @implements IAsyncDisposable
 
 <h1>Caminos en Grillas</h1>
@@ -11,61 +14,316 @@
     Conteo de caminos mínimos desde (0,0) hasta (a,b), moviéndose únicamente hacia la derecha o arriba.
 </p>
 <hr />
+@*Inputs*@
 <div>
     <label>Valor de a:</label>
-    <input type="number" @bind="A" />
+    <input type="number"
+           value="@A"
+           @oninput="OnAChanged" />
 </div>
 <br />
 <div>
     <label>Valor de b:</label>
-    <input type="number" @bind="B" />
+    <input type="number"
+           value="@B"
+           @oninput="OnBChanged" />
 </div>
 <br />
 
 
-<button @onclick="CalculatePaths">Calcular caminos</button>
+<button @onclick="GenerateGrid">Comenzar</button>
 <hr />
 
 
-<!-- Muestra los resultados del calculo -->
-
-@if (Result is not null)
+@*Muestra los resultados del calculo*@
+@if (GridCells.Any())
 {
-    <h3>Resultado</h3>
-    <p>Número de caminos mínimos:</p>
-    <h2>@Result</h2>
-    <p>Fórmula utilizada:</p>
-    <div id="math-output"></div>
-    <p>Prueba intercambiar los valores de a y b, y observarás como la cantidad de caminos minimos es la misma, es decir, que</p>
     
-    <div id="verificacion-igualdad"></div>
+    if (!GetMandatoryCells().Any() && !GetBlockedCells().Any())
+    {
+
+        <h3>Resultado</h3>
+        <p>Número de caminos mínimos:</p>
+        @if (Result is not null)
+        {
+            <h2>@Result
+            </h2>
+        }
+        <p>Fórmula utilizada:</p>
+        <div id="math-output"></div>
+        <p>Prueba intercambiar los valores de a y b, y observarás como la cantidad de caminos minimos es la misma, es decir, que</p>
+
+        <div id="verificacion-igualdad"></div>
+    }
+    @*inicio grilla *@
+
+    <hr />
+
+    <h3>Edición de grilla</h3>
+    <p>Escoge un modo, edita las grillas y vuelve a calcular los caminos. Abajo de la grilla encontrarás información adicional</p>
+
+    <div class="mode-panel">
+        @*Botones de estado (Hacer algo para ver en que estado está)*@
+        <button @onclick="() => CurrentMode = GridEditMode.Blocked">
+            Modo bloqueado
+        </button>
+
+        <button @onclick="() => CurrentMode = GridEditMode.Mandatory">
+            Modo obligatorio
+        </button>
+
+        @if (!string.IsNullOrWhiteSpace(ValidationMessage))
+        {
+            <p style="color:red;">
+                @ValidationMessage
+            </p>
+        }
+
+    </div>
+
+    @*Creación de la grilla*@
+    @if (GridCells.Any())
+    {
+        <svg width="@SvgWidth
+        "
+        height="@SvgHeight"
+        class="grid-svg">
+            @for (int y = 0; y <= B; y++)
+            {
+                for (int x = 0; x < A; x++)
+                {
+                    <line x1="@GetSvgX(x)"
+                    y1="@GetSvgY(y)"
+                    x2="@GetSvgX(x + 1)"
+                    y2="@GetSvgY(y)"
+                    class="grid-line" />
+                }
+            }
+
+
+            @for (int x = 0; x <= A; x++)
+            {
+                for (int y = 0; y < B; y++)
+                {
+                    <line x1="@GetSvgX(x)
+                    "
+                    y1="@GetSvgY(y)"
+                    x2="@GetSvgX(x)"
+                    y2="@GetSvgY(y + 1)"
+                    class="grid-line" />
+                }
+            }
+
+            @foreach (var cell in GridCells)
+            {
+                <g>
+
+                    <circle cx="@GetSvgX(cell.X)"
+                    cy="@GetSvgY(cell.Y)"
+                    r="10"
+                    class="@GetSvgClass(cell)"
+                    @onclick="() => ToggleCell(cell)" />
+
+                    <text x="@GetSvgX(cell.X)"
+                    y="@(GetSvgY(cell.Y) - 18)"
+                    class="grid-label">
+
+                        (@cell.X,@cell.Y)
+
+                    </text>
+
+                </g>
+            }
+
+        </svg>
+    }
+
+
+    @*Explicación del funcionamiento con bloqueos y obligatorios*@
+    @if (GetBlockedCells().Any() || GetMandatoryCells().Any())
+    {
+        <h2>¿Por qué funciona esto?</h2>
+        <p>Para poder calcular correctamente los caminos minimos posibles teniendo en cuenta las rutas obligatorias y las rutas bloqueadas,
+            es necesario tratar la situación por dos pasos. </p>
+    }
+    <h4>Explicación: Caminos Obligatorios</h4>
+
+    <p>Primero se calculan las rutas obligatorias, dividiendo la ruta por tramos, según la cantidad de puntos obligatorios por los que hay que pasar</p>
+        @*Muestra por tramos*@
+        @for (int i = 0; i < SegmentExplanations.Count; i++)
+        {
+            var segment = SegmentExplanations[i];
+
+            <div class="explanation-block">
+
+                <h4>Tramo @(i + 1)</h4>
+
+                <p>
+                    Desde (@segment.Start.X,@segment.Start.Y)
+                    hasta
+                    (@segment.End.X,@segment.End.Y)
+                </p>
+
+                <p>
+                    Se necesitan
+                    @segment.Dx pasos a la derecha
+                    y
+                    @segment.Dy pasos hacia arriba.
+                </p>
+
+                <div>
+                    <div id="segment-math-@i"></div>
+                </div>
+
+            </div>
+        }
+
+        <div id="math-output-mandatory"></div>
+    @if (GetBlockedCells().Any())
+    {
+        <p>Luego, para calcularlo con los caminos bloqueados, debemos usar el complemento, de tal manera que queda:</p>
+        <hr />
+        <h4>Explicación: Caminos Bloqueados</h4>
+        <div class="explanation-block">
+            <p>Usamos el complemento:</p>
+
+            <div id="blocked-text-1" style="text-align: center; margin-bottom: 15px;"></div>
+
+            <p>Entonces:</p>
+
+            <div style="text-align: center;">
+                <div id="blocked-math-1" style="display: inline-block; padding: 10px;"></div>
+            </div>
+        </div>
+    }
+
+
 }
 
-<!-- Espacio para poner proximamente el mapa (plano cartenciano?) para hacerlo visual -->
-
-
-
-
-
 @code {
-    private int A = 3; // Valores bases o si no funciona de esta manera
-    private int B = 3;
+    private int A = 6; // Valores bases como el ejemplo de la semana 9. Si no, no funciona de esta manera
+    private int B = 4;
     private BigInteger? Result;
+    private BigInteger? MandatoryResult;
     private IJSObjectReference? _module;
     private bool _shouldRenderMath = false;
 
+    // Visualización de grilla
+    private List<GridCell> GridCells = new();
+
+    private GridEditMode CurrentMode = GridEditMode.Blocked;
+
+    //svg para mejorar lo visual
+    private const int CellSpacing = 70;
+    private const int Margin = 50;
+
+    private int SvgWidth => (A * CellSpacing) + Margin * 2;
+    private int SvgHeight => (B * CellSpacing) + Margin * 2;
+
+    private List<PathSegmentExp> SegmentExplanations = new();
+
+
+    // Calculo de los caminos. Ya tiene en cuenta los bloqueados y obligatorios
+    private string ValidationMessage = "";
+
     private void CalculatePaths()
     {
-        Result = GridPathService.CalculateBasicPath(A, B);
+        var blocked = GetBlockedCells();
+        var mandatory = GetMandatoryCells();
+
+        SegmentExplanations.Clear();
+
+        if (!AreMandatoryPointsValid(mandatory))
+        {
+            ValidationMessage =
+                "Los puntos obligatorios no forman un camino válido.";
+
+            Result = 0;
+            MandatoryResult = 0;
+
+            return;
+        }
+
+        var sequence = BuildPathSequence(mandatory);
+
+        BigInteger mandatoryPaths = 1;
+
+        for (int i = 0; i < sequence.Count - 1; i++)
+        {
+            var start = sequence[i];
+            var end = sequence[i + 1];
+
+            BigInteger segmentPathsWithoutBlocked =
+                GridDynamicService.CountPathsBetweenPoints(
+                    start.X,
+                    start.Y,
+                    end.X,
+                    end.Y,
+                    new List<GridCell>());
+
+            mandatoryPaths *= segmentPathsWithoutBlocked;
+
+            SegmentExplanations.Add(
+                new PathSegmentExp
+                    {
+                        Start = start,
+                        End = end,
+                        Dx = end.X - start.X,
+                        Dy = end.Y - start.Y,
+                        Result = segmentPathsWithoutBlocked
+                    });
+        }
+
+        MandatoryResult = mandatoryPaths;
+
+
+        BigInteger totalPaths = 1;
+
+        for (int i = 0; i < sequence.Count - 1; i++)
+        {
+            var start = sequence[i];
+            var end = sequence[i + 1];
+
+            BigInteger segmentPathsWithBlocked =
+                GridDynamicService.CountPathsBetweenPoints(
+                    start.X,
+                    start.Y,
+                    end.X,
+                    end.Y,
+                    blocked);
+
+            if (segmentPathsWithBlocked == 0)
+            {
+                Result = 0;
+
+                ValidationMessage =
+                    "No existe un camino válido.";
+
+                return;
+            }
+
+            totalPaths *= segmentPathsWithBlocked;
+        }
+
+        Result = totalPaths;
+
+        ValidationMessage = "";
+
         _shouldRenderMath = true;
     }
+
+
 
     // Se llama a MathJax
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender || _shouldRenderMath)
+        if (_shouldRenderMath)
         {
             _shouldRenderMath = false;
+
+            // 50ms de espera para que cargue
+            await Task.Delay(50);
+
             await RenderMath();
         }
     }
@@ -78,12 +336,45 @@
         try
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>(
-                "import", "./js/mathjax-helper.js");
+                "import", $"./js/mathjax-helper.js?v={DateTime.Now.Ticks}");
 
-            //String del cálculo           
-            string latexFormula = $"\\binom{{a + b}}{{a}} = \\binom{{{A + B}}}{{{A}}} = {Result}";
+            // Fórmula general
+            string latexFormula = $"\\binom{{{A + B}}}{{{A}}} = {Result}";
+            await _module.InvokeVoidAsync("renderMath", "math-output", latexFormula);
 
-            await _module.InvokeVoidAsync("renderMathJax", latexFormula);
+            // Igualdad
+            await _module.InvokeVoidAsync("renderMath", "verificacion-igualdad", "\\binom{a+b}{a} = \\binom{a+b}{b}");
+
+            // Tramos obligatorios (si los hay)
+            string mandatoryLatex = BuildMandatoryLatex();
+            if (!string.IsNullOrEmpty(mandatoryLatex))
+            {
+                await _module.InvokeVoidAsync("renderMath", "math-output-mandatory", mandatoryLatex + $" = {MandatoryResult}");
+            }
+
+            // Segmentos individuales
+            for (int i = 0; i < SegmentExplanations.Count; i++)
+            {
+                var segment = SegmentExplanations[i];
+                string latex = $"\\binom{{{segment.Dx + segment.Dy}}}{{{segment.Dx}}} = {segment.Result}";
+
+                await _module.InvokeVoidAsync("renderMath", $"segment-math-{i}", latex);
+            }
+
+            // Apartado de los bloqueados
+            var blockedCells = GetBlockedCells();
+            if (blockedCells.Any())
+            {
+                // Coleción de puntos a evitar
+                string pointsText = string.Join(", ", blockedCells.Select(c => $"({c.X}, {c.Y})"));
+                string textLatex = $@"\text{{Caminos que evitan los puntos: }} \{{ {pointsText} \}}";
+                await _module.InvokeVoidAsync("renderMath", "blocked-text-1", textLatex);
+
+            }
+
+            string blockedLatex = BuildBlockedLatex();
+
+            await _module.InvokeVoidAsync("renderMath","blocked-math-1",blockedLatex + $" = {Result}");
         }
         catch (Exception ex)
         {
@@ -91,9 +382,264 @@
         }
     }
 
+
+    private string BuildMandatoryLatex()
+    {
+        if (!SegmentExplanations.Any())
+            return "";
+
+        List<string> parts = new();
+        foreach (var segment in SegmentExplanations)
+        {
+            parts.Add($"\\binom{{{segment.Dx + segment.Dy}}}{{{segment.Dx}}}");
+        }
+
+        return string.Join(" \\cdot ", parts);
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (_module is not null)
             await _module.DisposeAsync();
     }
+
+    //Metodo de visualización de grilla
+    private void GenerateGrid()
+    {
+        GridCells = GridGeneratorService.GenerateGrid(A, B);
+        CalculatePaths();
+        _shouldRenderMath = true;
+
+    }
+
+    // Cambiar estados de los puntos en la grila
+    private void ToggleCell(GridCell cell)
+    {
+        if (cell.IsStart || cell.IsEnd)
+            return;
+
+        switch (CurrentMode)
+        {
+            case GridEditMode.Blocked:
+
+                if (cell.IsMandatory)
+                    return;
+
+                cell.IsBlocked = !cell.IsBlocked;
+
+                break;
+
+            case GridEditMode.Mandatory:
+
+                if (cell.IsBlocked)
+                    return;
+
+                cell.IsMandatory = !cell.IsMandatory;
+
+                break;
+        }
+        // Para que calcule nuevamente los caminos con cada cambio
+        CalculatePaths();
+    }
+
+    // Clases para estilos visuales
+    private string GetSvgClass(GridCell cell)
+    {
+        if (cell.IsStart)
+            return "grid-node start-node";
+
+        if (cell.IsEnd)
+            return "grid-node end-node";
+
+        if (cell.IsBlocked)
+            return "grid-node blocked-node";
+
+        if (cell.IsMandatory)
+            return "grid-node mandatory-node";
+
+        return "grid-node";
+    }
+
+    //Posiciones de los puntos
+    private int GetSvgX(int x)
+    {
+        return Margin + x * CellSpacing;
+    }
+
+    private int GetSvgY(int y)
+    {
+        return SvgHeight - Margin - y * CellSpacing;
+    }
+
+    //Obtener las celdas especiales
+    private List<GridCell> GetBlockedCells()
+    {
+        return GridCells
+            .Where(c => c.IsBlocked)
+            .ToList();
+    }
+
+    private List<GridCell> GetMandatoryCells()
+    {
+        return GridCells
+            .Where(c => c.IsMandatory)
+            .OrderBy(c => c.X)
+            .ThenBy(c => c.Y)
+            .ToList();
+    }
+
+    // Verifica si los obligatorios son validos
+    private bool AreMandatoryPointsValid(List<GridCell> mandatory)
+    {
+        for (int i = 0; i < mandatory.Count - 1; i++)
+        {
+            var current = mandatory[i];
+            var next = mandatory[i + 1];
+
+            if (next.X < current.X || next.Y < current.Y)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Genera la secuencia de tramos
+    private List<GridCell> BuildPathSequence(
+    List<GridCell> mandatory)
+    {
+        List<GridCell> sequence = new();
+
+        sequence.Add(new GridCell
+            {
+                X = 0,
+                Y = 0
+            });
+
+        sequence.AddRange(mandatory);
+
+        sequence.Add(new GridCell
+            {
+                X = A,
+                Y = B
+            });
+
+        return sequence;
+    }
+
+    // Reiniciar la grilla (Puedo poner un botón luego)
+    private void ResetGrid()
+    {
+        GridCells.Clear();
+        SegmentExplanations.Clear();
+        Result = null;
+        ValidationMessage = "";
+    }
+    
+    //Reinicio con cada cambio de valores A,B
+    private void OnAChanged(ChangeEventArgs e)
+    {
+        A = int.Parse(e.Value?.ToString() ?? "0");
+
+        ResetGrid();
+    }
+
+    private void OnBChanged(ChangeEventArgs e)
+    {
+        B = int.Parse(e.Value?.ToString() ?? "0");
+
+        ResetGrid();
+    }
+
+    // Genera el bloque completo del apartado de explicación de bloqueados. Se tiene en cuenta para más de un punto bloqueado porque queda
+    // muy complejo poner la operación completa
+    private string BuildBlockedLatex()
+    {
+        var blocked = GetBlockedCells();
+        var mandatory = GetMandatoryCells();
+
+        if (!blocked.Any())
+            return "";
+
+
+        string totalLatex;
+
+        if (mandatory.Any())
+        {
+            totalLatex = BuildMandatoryLatex();
+        }
+        else
+        {
+            totalLatex =
+                $@"\binom{{{A + B}}}{{{A}}}";
+        }
+
+        if (blocked.Count == 1)
+        {
+            var blockedPoint = blocked[0];
+
+            List<GridCell> sequence = new();
+
+            sequence.Add(new GridCell
+                {
+                    X = 0,
+                    Y = 0
+                });
+
+            sequence.AddRange(mandatory);
+
+            sequence.Add(blockedPoint);
+
+            sequence.Add(new GridCell
+                {
+                    X = A,
+                    Y = B
+                });
+
+            sequence = sequence
+                .OrderBy(p => p.X)
+                .ThenBy(p => p.Y)
+                .ToList();
+
+            List<string> parts = new();
+
+            bool valid = true;
+
+            for (int i = 0; i < sequence.Count - 1; i++)
+            {
+                var start = sequence[i];
+                var end = sequence[i + 1];
+
+                int dx = end.X - start.X;
+                int dy = end.Y - start.Y;
+
+                if (dx < 0 || dy < 0)
+                {
+                    valid = false;
+                    break;
+                }
+
+                parts.Add(
+                    $@"\binom{{{dx + dy}}}{{{dx}}}");
+            }
+
+            if (!valid)
+            {
+                return totalLatex;
+            }
+
+            string blockedTerm =
+                string.Join(" \\cdot ", parts);
+
+            return totalLatex
+                   + " - ("
+                   + blockedTerm
+                   + ")";
+        }
+
+        return totalLatex
+               + @"\quad - \text{(Caminos bloqueados: El resultado final se calcula mediante programación dinámica)}";
+    }
+
 }
