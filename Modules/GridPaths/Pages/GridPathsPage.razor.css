@@ -1,4 +1,133 @@
-﻿.grid-svg {
+﻿/* Tipografía y fondo general para dar aspecto de documento académico */
+h1, h2, h3, h4 {
+    font-family: 'Georgia', 'Cambria', serif;
+    color: #2c3e50;
+    font-weight: normal;
+    margin-bottom: 0.5rem;
+}
+
+h1 {
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+p, label {
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #4a5568;
+    line-height: 1.6;
+}
+
+/* Contenedor de Inputs */
+.input-group {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Inputs minimalistas, estilo "llenar el espacio" */
+input[type="number"] {
+    font-family: monospace; /* Da un toque técnico/matemático */
+    font-size: 1.1rem;
+    color: #2c3e50;
+    border: none;
+    border-bottom: 2px solid #cbd5e0;
+    background-color: transparent;
+    padding: 4px 8px;
+    width: 80px;
+    text-align: center;
+    transition: border-color 0.2s ease;
+}
+
+    input[type="number"]:focus {
+        outline: none;
+        border-bottom: 2px solid #4a90e2; /* Azul tenue al enfocar */
+    }
+
+/* Botón principal (Comenzar) */
+button.primary-btn {
+    background-color: #f7fafc;
+    border: 1px solid #cbd5e0;
+    color: #2c3e50;
+    padding: 8px 16px;
+    font-family: system-ui, sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+    button.primary-btn:hover {
+        background-color: #edf2f7;
+        border-color: #a0aec0;
+    }
+
+/* Panel de Modos de Edición */
+.mode-panel {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* Botones de modo (Bloqueado / Obligatorio) */
+.mode-button {
+    background-color: transparent;
+    border: 1px solid #cbd5e0;
+    color: #4a5568;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+    /* Colores semánticos pero tenues (pastel) para los estados activos */
+    .mode-button.active-blocked {
+        background-color: #fff5f5; /* Rojo muy tenue */
+        border-color: #feb2b2;
+        color: #c53030;
+    }
+
+    .mode-button.active-mandatory {
+        background-color: #f0fff4; /* Verde muy tenue */
+        border-color: #9ae6b4;
+        color: #276749;
+    }
+
+/* Cajas de Error y Validación */
+.validation-box {
+    background-color: #fff5f5;
+    border-left: 4px solid #fc8181;
+    padding: 10px 15px;
+    margin: 15px 0;
+    color: #9b2c2c;
+}
+
+    .validation-box p {
+        margin: 0;
+        color: inherit;
+    }
+
+/* Cajas de Explicación (Tramos) */
+.explanation-block {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+/* Separadores sutiles */
+hr {
+    border: 0;
+    height: 1px;
+    background: #e2e8f0;
+    margin: 20px 0;
+}
+
+
+
+
+.grid-svg {
     border: 2px solid #444;
     background-color: #fafafa;
     margin-top: 30px;
@@ -47,4 +176,35 @@
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
+}
+
+.validation-box {
+    background-color: #ffe5e5;
+    border: 2px solid #cc0000;
+    color: #990000;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+.mode-button {
+    padding: 10px 18px;
+    margin-right: 10px;
+    border: 2px solid #888;
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+    .mode-button:hover {
+        background-color: #f0f0f0;
+    }
+
+.active-mode {
+    background-color: #2563eb;
+    color: white;
+    border-color: #2563eb;
+    font-weight: bold;
 }
