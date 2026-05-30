@@ -1,5 +1,5 @@
 ﻿@page "/gridpaths"
-@using System.Numerics
+@using System.Numerics;
 @using Problemas_de_Conteo.Modules.GridPaths.Services
 @using Problemas_de_Conteo.Modules.GridPaths.Models
 @using Microsoft.JSInterop
@@ -15,23 +15,21 @@
 </p>
 <hr />
 @*Inputs*@
-<div>
-    <label>Valor de a:</label>
-    <input type="number"
+<div class="input-group">
+    <label>Valor de la base (a):</label>
+    @* type="number", min="0" y step="1" aseguran en la UI que sean naturales *@
+    <input type="number" min="0" step="1"
            value="@A"
            @oninput="OnAChanged" />
 </div>
-<br />
-<div>
-    <label>Valor de b:</label>
-    <input type="number"
+<div class="input-group">
+    <label>Valor de la altura (b):</label>
+    <input type="number" min="0" step="1"
            value="@B"
            @oninput="OnBChanged" />
 </div>
-<br />
 
-
-<button @onclick="GenerateGrid">Comenzar</button>
+<button class="primary-btn" @onclick="GenerateGrid">Generar Cuadrícula</button>
 <hr />
 
 
@@ -62,25 +60,49 @@
     <h3>Edición de grilla</h3>
     <p>Escoge un modo, edita las grillas y vuelve a calcular los caminos. Abajo de la grilla encontrarás información adicional</p>
 
+
     <div class="mode-panel">
-        @*Botones de estado (Hacer algo para ver en que estado está)*@
-        <button @onclick="() => CurrentMode = GridEditMode.Blocked">
-            Modo bloqueado
+        <button class="mode-button @(CurrentMode == GridEditMode.Blocked ? "active-blocked" : "")"
+                @onclick="() => CurrentMode = GridEditMode.Blocked">
+            Modo Bloqueo
         </button>
 
-        <button @onclick="() => CurrentMode = GridEditMode.Mandatory">
-            Modo obligatorio
+        <button class="mode-button @(CurrentMode == GridEditMode.Mandatory ? "active-mandatory" : "")"
+                @onclick="() => CurrentMode = GridEditMode.Mandatory">
+            Modo Obligatorio
         </button>
-
-        @if (!string.IsNullOrWhiteSpace(ValidationMessage))
-        {
-            <p style="color:red;">
-                @ValidationMessage
-            </p>
-        }
-
     </div>
 
+    @if (!string.IsNullOrWhiteSpace(ValidationMessage))
+    {
+        <div class="validation-box">
+            <strong>Atención:</strong>
+            <p>@ValidationMessage</p>
+        </div>
+    }
+    else if (HasNoValidPath)
+    {
+        @* Si no hay error lógico pero los caminos se redujeron a cero *@
+        <div class="validation-box" style="border-left-color: #a0aec0; background-color: #f7fafc; color: #4a5568;">
+            <strong>Ruta bloqueada:</strong>
+            <p>La configuración actual de restricciones ha bloqueado todos los caminos posibles hacia el destino.</p>
+        </div>
+    }
+
+    @if (CurrentMode == GridEditMode.Blocked)
+    {
+        <p style="color: #c53030; font-size: 0.9rem; font-style: italic;">
+            * Haz clic en los nodos para restringir el paso.
+        </p>
+    }
+    else
+    {
+        <p style="color: #276749; font-size: 0.9rem; font-style: italic;">
+            * Haz clic en los nodos para establecer paradas obligatorias.
+        </p>
+    }
+
+    <center>
     @*Creación de la grilla*@
     @if (GridCells.Any())
     {
@@ -138,17 +160,21 @@
         </svg>
     }
 
+    </center>
+
 
     @*Explicación del funcionamiento con bloqueos y obligatorios*@
-    @if (GetBlockedCells().Any() || GetMandatoryCells().Any())
+    @if (!HasNoValidPath)
     {
-        <h2>¿Por qué funciona esto?</h2>
-        <p>Para poder calcular correctamente los caminos minimos posibles teniendo en cuenta las rutas obligatorias y las rutas bloqueadas,
-            es necesario tratar la situación por dos pasos. </p>
-    }
-    <h4>Explicación: Caminos Obligatorios</h4>
+        @if (GetBlockedCells().Any() || GetMandatoryCells().Any())
+        {
+            <h2>¿Por qué funciona esto?</h2>
+            <p>Para poder calcular correctamente los caminos minimos posibles teniendo en cuenta las rutas obligatorias y las rutas bloqueadas,
+                es necesario tratar la situación por dos pasos. Calcular caminos obligatorios y calcular caminos bloqueados </p>
+        }
+        <h4>Explicación: Caminos Obligatorios</h4>
 
-    <p>Primero se calculan las rutas obligatorias, dividiendo la ruta por tramos, según la cantidad de puntos obligatorios por los que hay que pasar</p>
+        <p>Primero se calculan las rutas obligatorias, dividiendo la ruta por tramos, según la cantidad de puntos obligatorios por los que hay que pasar</p>
         @*Muestra por tramos*@
         @for (int i = 0; i < SegmentExplanations.Count; i++)
         {
@@ -179,24 +205,24 @@
         }
 
         <div id="math-output-mandatory"></div>
-    @if (GetBlockedCells().Any())
-    {
-        <p>Luego, para calcularlo con los caminos bloqueados, debemos usar el complemento, de tal manera que queda:</p>
-        <hr />
-        <h4>Explicación: Caminos Bloqueados</h4>
-        <div class="explanation-block">
-            <p>Usamos el complemento:</p>
+        @if (GetBlockedCells().Any())
+        {
+            <p>Luego, para calcularlo con los caminos bloqueados, debemos usar el complemento, de tal manera que queda:</p>
+            <hr />
+            <h4>Explicación: Caminos Bloqueados</h4>
+            <div class="explanation-block">
+                <p>Usamos el complemento:</p>
 
-            <div id="blocked-text-1" style="text-align: center; margin-bottom: 15px;"></div>
+                <div id="blocked-text-1" style="text-align: center; margin-bottom: 15px;"></div>
 
-            <p>Entonces:</p>
+                <p>Entonces:</p>
 
-            <div style="text-align: center;">
-                <div id="blocked-math-1" style="display: inline-block; padding: 10px;"></div>
+                <div style="text-align: center;">
+                    <div id="blocked-math-1" style="display: inline-block; padding: 10px;"></div>
+                </div>
             </div>
-        </div>
+        }
     }
-
 
 }
 
@@ -207,6 +233,7 @@
     private BigInteger? MandatoryResult;
     private IJSObjectReference? _module;
     private bool _shouldRenderMath = false;
+    private bool HasNoValidPath = false;
 
     // Visualización de grilla
     private List<GridCell> GridCells = new();
@@ -228,6 +255,9 @@
 
     private void CalculatePaths()
     {
+        HasNoValidPath = false;
+        ValidationMessage = "";
+
         var blocked = GetBlockedCells();
         var mandatory = GetMandatoryCells();
 
@@ -235,6 +265,7 @@
 
         if (!AreMandatoryPointsValid(mandatory))
         {
+            HasNoValidPath = true;
             ValidationMessage =
                 "Los puntos obligatorios no forman un camino válido.";
 
@@ -295,9 +326,9 @@
             if (segmentPathsWithBlocked == 0)
             {
                 Result = 0;
-
+                HasNoValidPath = true;
                 ValidationMessage =
-                    "No existe un camino válido.";
+                    "No existe un camino válido con la configuración actual.";
 
                 return;
             }
@@ -306,8 +337,6 @@
         }
 
         Result = totalPaths;
-
-        ValidationMessage = "";
 
         _shouldRenderMath = true;
     }
@@ -536,20 +565,34 @@
         Result = null;
         ValidationMessage = "";
     }
-    
-    //Reinicio con cada cambio de valores A,B
+
+    //Reinicio con cada cambio de valores A,B y verificación de valores
     private void OnAChanged(ChangeEventArgs e)
     {
-        A = int.Parse(e.Value?.ToString() ?? "0");
+        string value = e.Value?.ToString() ?? "";
 
-        ResetGrid();
+        if (int.TryParse(value, out int parsedValue))
+        {
+            if (parsedValue >= 0)
+            {
+                A = parsedValue;
+                ResetGrid();
+            }
+        }
     }
 
     private void OnBChanged(ChangeEventArgs e)
     {
-        B = int.Parse(e.Value?.ToString() ?? "0");
+        string value = e.Value?.ToString() ?? "";
 
-        ResetGrid();
+        if (int.TryParse(value, out int parsedValue))
+        {
+            if (parsedValue >= 0)
+            {
+                B = parsedValue;
+                ResetGrid();
+            }
+        }
     }
 
     // Genera el bloque completo del apartado de explicación de bloqueados. Se tiene en cuenta para más de un punto bloqueado porque queda
