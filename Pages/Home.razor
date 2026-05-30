@@ -1,23 +1,49 @@
 ﻿@page "/"
 
-<PageTitle>Inicio</PageTitle>
+<PageTitle>Portal de Combinatoria</PageTitle>
 
-<h1>Combinatorix</h1>
+<div class="academic-container">
+    <h1 class="main-title">Análisis Combinatorio Interactivo</h1>
+    <p class="subtitle">
+        Un entorno didáctico diseñado para la exploración, visualización y resolución de problemas de conteo constructivo y discreto.
+        Para profundizar un poco en las formulas y principios combinatorios utilizados, puesdes revisar el documento pdf del repositorios
+        titulado: ""
+    </p>
 
-<p>Plataforma interactiva para problemas de conteo y caminos.</p>
-<hr/>
+    <hr class="academic-divider" />
 
-<div>
-    <h3>Caminos en Grillas</h3>
+    <div class="modules-grid">
 
-    <p>Visualización de caminos mínimos y conteo de rutas.</p>
-    <a href="/gridpaths">Ir al módulo</a>
-</div>
-<br/>
-<div>
-    <h3>Conteo de Contraseñas</h3>
+		<div class="module-card">
+			<div class="card-header">
+				<span class="module-index">Módulo I</span>
+				<h2 class="module-title">Contador de contraseñas</h2>
+			</div>
+			<p class="module-description">
+				Contador de números de <i>n</i> cifras que cumplen ciertas condiciones.
 
-    <p>Sistema de conteo combinatorio para contraseñas.</p>
+			</p>
+			<div class="card-action">
+				<a href="/passwords" class="academic-link">Acceder al módulo &rarr;</a>
+			</div>
+		</div>
 
-    <a href="/passwords">Ir al módulo</a>
+        <div class="module-card">
+            <div class="card-header">
+                <span class="module-index">Módulo II</span>
+                <h2 class="module-title">Caminos en Grilla</h2>
+            </div>
+            <p class="module-description">
+                Modelado geométrico y cálculo visual de caminos mínimos en una grilla.
+                Permite contar caminos minimos en configuraciones ideales mediante coeficientes binomiales analíticos y evaluar restricciones
+                complejas de paso obligatorio o exclusión de nodos.
+            </p>
+            <div class="card-action">
+                <a href="/gridpaths" class="academic-link">Acceder al módulo &rarr;</a>
+            </div>
+        </div>
+
+
+
+    </div>
 </div>
