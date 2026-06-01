@@ -1,29 +1,28 @@
 # Problemas de Conteo
-Esta es una aplicación web diseñada para resolver problemas de conteo, relacionados al sistema de conteo de contraseñas y de encontrar caminos minimos en una grilla.
+Esta es una aplicación web diseñada para resolver problemas combinatorios: análisis de espacios de contraseña y conteo de caminos mínimos en grillas.
 
 Conceptos implementados:
 - Principios fundamentales de conteo.
 - Permutaciones y variaciones.
 - Combinaciones.
+- Regla de producto.
+- Principio de complementación.
 - Principio de Inclusión-Exclusión.
 - Restricciones de tipo "al menos uno".
-- Caminos minimos en grillas.
+- Caminos mínimos en grillas.
 - Puntos obligatorios y puntos de bloqueados.
 
-## Capturas
-
-## Tecnologías
-- .NET 8
-- Blazor
-- C#
-- MathJax
+## Tecnologías Utilizadas
+- **Blazor (.NET 8)** - Arquitectura de componentes SPA en WebAssembly/Server.
+- **C#** - Lógica analítica respaldada por `BigInteger` para precisión matemática infinita.
+- **MathJax** - Renderizado dinámico de formulas LaTex.
 
 ## Requisitos
-- .NET SDK 8.0 o superior
+- .NET SDK 8.0 o superior instalado en el sistema
 
 ## Instalación
 
-Para ejecutar este proyecto, clone el respositorio:
+Para ejecutar este proyecto, clone el repositorio:
 ```bash
 git clone https://github.com/DioRB/ProblemasDeConteo.git
 ```
