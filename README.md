@@ -56,7 +56,8 @@ Navegue y seleccione el módulo deseado, los cuales son Contador de contraseñas y
 4. Marque los grupos requeridos.
 5. Presione Calcular.
 
-(Imagen Ejemplo numerico)
+![Logo](wwwroot/images/ContrEj1-1.png)
+![Logo](wwwroot/images/ContrEj1-2.png)
 
 El resultado muestra la operación aritmetica utilizada y su resultado numérico.
 
@@ -68,7 +69,9 @@ El resultado muestra la operación aritmetica utilizada y su resultado numérico.
 5. Abajo observará las explicaciones en las secciones correspondientes de Caminos Obligatorios y Caminos Bloqueados.
 6. Experimente distintos tamaños y configuraciones para analizar cómo cambian los resultados.
 
-(Imagen de ejemplo)
+
+![Logo](wwwroot/images/GridEj1-1.png)
+![Logo](wwwroot/images/GridEj1-2.png)
 
 El resultado muestra el desarrollo matemático utilizado para calcular la cantidad total de caminos, incluyendo los aportes de los puntos obligatorios y las restricciones impuestas por los puntos bloqueados.
 
