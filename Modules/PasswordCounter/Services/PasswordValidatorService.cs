@@ -4,6 +4,7 @@ namespace Problemas_de_Conteo.Modules.PasswordCounter.Services
 {
 	public class PasswordValidatorService
 	{
+        // Validación de las entradas
         public string Validate(PasswordConfig config)
         {
             if (config.Length <= 0)
@@ -15,7 +16,6 @@ namespace Problemas_de_Conteo.Modules.PasswordCounter.Services
             if (!config.AllowRepetition && config.Length > config.AlphabetSize)
                 return "No es posible generar contraseñas sin repetición: la longitud supera el alfabeto.";
 
-            // ✅ Validación nueva
             var invalidGroups = config.Groups
                 .Where(g => g.Size < 0)
                 .Select(g => g.Name)
