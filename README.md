@@ -72,4 +72,6 @@ El resultado muestra la operación aritmetica utilizada y su resultado numérico.
 
 El resultado muestra el desarrollo matemático utilizado para calcular la cantidad total de caminos, incluyendo los aportes de los puntos obligatorios y las restricciones impuestas por los puntos bloqueados.
 
+Puede encontrar información un poco más especifica en el documento presente en el repositorio [ProblemasConteo.pdf](https://github.com/DioRB/ProblemasDeConteo/blob/main/ProblemasConteo.pdf)
+
 
