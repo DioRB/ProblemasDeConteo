@@ -4,6 +4,7 @@ using Problemas_de_Conteo.Modules.GridPaths.Models;
 namespace Problemas_de_Conteo.Modules.GridPaths.Services;
 
 // Clase que cuenta los caminos posibles y los caminos entre puntos evitando los bloqueados
+// Matriz dp para ayuda con los caminos con bloqueos y con ambas restricciones
 public class GridDynamicService
 {
     public BigInteger CountPaths(
