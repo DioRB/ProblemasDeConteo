@@ -58,7 +58,7 @@ Navegue y seleccione el módulo deseado, los cuales son Contador de contraseñas y
 
 (Imagen Ejemplo numerico)
 
-El resultado muestra la operación aritmetica utilizada (puede fallar con un gran numero de restricciones) y su resultado numérico.
+El resultado muestra la operación aritmetica utilizada y su resultado numérico.
 
 ## Instrucciones de uso: Caminos minimos en grilla.
 1. Ingrese los valores de base (a) y de altura (b), punto donde se encuentra el destino de la grilla.
