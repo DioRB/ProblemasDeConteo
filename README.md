@@ -18,7 +18,7 @@ Conceptos implementados:
 - **MathJax** - Renderizado dinámico de formulas LaTex.
 
 ## Requisitos
-- .NET SDK 8.0 o superior instalado en el sistema
+- .NET SDK 8.0 o superior instalado en el sistema. Puede descargarlo [acá](https://dotnet.microsoft.com/en-us/download/visual-studio-sdks)
 
 ## Instalación
 
