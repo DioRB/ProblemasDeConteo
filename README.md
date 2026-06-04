@@ -47,7 +47,7 @@ Abra en un navegador la URL dada por la aplicación (normalmente https://localhos
 
 Navegue y seleccione el módulo deseado, los cuales son Contador de contraseñas y Caminos en grilla
 
-(Imagen)
+![Logo](wwwroot/images/Inicio.png)
 
 ## Instrucciones de uso: Conteo de contraseñas.
 1. Ingrese la longitud de la contraseña.
